@@ -185,8 +185,7 @@ def draw_game(screen, snake, apple):
 def main():
     """Запускает игровой цикл, обрабатывает события и управляет отрисовкой."""
     pygame.init()
-    screen = pygame.display.set_mode
-    (
+    screen = pygame.display.set_mode(
         (SCREEN_WIDTH, SCREEN_HEIGHT),
         0,
         32,
