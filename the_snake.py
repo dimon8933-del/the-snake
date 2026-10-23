@@ -2,46 +2,30 @@ from random import randint, choice
 
 import pygame
 
-# Константы для размеров поля и сетки:
 SCREEN_WIDTH, SCREEN_HEIGHT = 640, 480
 GRID_SIZE = 20
 GRID_WIDTH = SCREEN_WIDTH // GRID_SIZE
 GRID_HEIGHT = SCREEN_HEIGHT // GRID_SIZE
 
-# Центр экрана
 CENTER_OF_SCREEN = (SCREEN_HEIGHT // 2, SCREEN_WIDTH // 2)
 
-# Направления движения:
 UP = (0, -1)
 DOWN = (0, 1)
 LEFT = (-1, 0)
 RIGHT = (1, 0)
 
-# Цвет фона - черный:
+
 BOARD_BACKGROUND_COLOR = (0, 0, 0)
-
-# Цвет границы ячейки
 BORDER_COLOR = (93, 216, 228)
-
-# Цвет яблока
 APPLE_COLOR = (255, 0, 0)
-
-# Цвет листика
 LEAF_COLOR = (0, 128, 0)
-
-# Цвет змейки
 SNAKE_COLOR = (0, 255, 0)
-
-# Скорость движения змейки:
 SPEED = 20
 
-# Настройка игрового окна:
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
 
-# Заголовок окна игрового поля:
 pygame.display.set_caption('Змейка')
 
-# Настройка времени:
 clock = pygame.time.Clock()
 
 
@@ -114,10 +98,8 @@ class Snake(GameObject):
 
     def move(self):
         """Перемещает змейку на один сегмент в текущем направлении."""
-        # Получаем текущую голову змейки
         cur_head_pos = self.positions[0]
         x, y = cur_head_pos
-        # Определяем новую позицию головы в зависимости от направления
         if self.direction == UP:
             new_head_pos = (x, (y - GRID_SIZE) % SCREEN_HEIGHT)
         elif self.direction == DOWN:
@@ -127,10 +109,8 @@ class Snake(GameObject):
         elif self.direction == RIGHT:
             new_head_pos = ((x + GRID_SIZE) % SCREEN_WIDTH, y)
 
-        # Вставляем новую позицию головы в начало списка positions
         self.positions.insert(0, new_head_pos)
 
-        # Удаляем последний элемент списка, чтобы змейка двигалась
         if len(self.positions) > self.length:
             self.last = self.positions[-1]
             self.positions.pop()
@@ -153,7 +133,6 @@ class Snake(GameObject):
         for position in self.positions[:-1]:
             self.draw_rect(position, self.body_color)
 
-        # Отрисовка головы змейки
         self.draw_rect(self.positions[0], self.body_color)
 
         if self.last:
