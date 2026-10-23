@@ -71,7 +71,6 @@ class Apple(GameObject):
     def draw(self):
         """Отрисовывает яблоко и лист на экране."""
         self.draw_rect(self.position, self.body_color)
-        # Отрисовка листа
         leaf_position = (self.position[0] + 10, self.position[1] + 1)
         leaf_size = (GRID_SIZE // 4, GRID_SIZE // 2)
         leaf_rect = pygame.Rect(leaf_position, leaf_size)
