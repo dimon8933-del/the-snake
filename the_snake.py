@@ -77,8 +77,8 @@ class GameObject:
                 в классе-наследнике.
         """
         raise NotImplementedError(
-            f"Метод draw должен быть реализован в классе "
-            f"{self.__class__.__name__}"
+            f'Метод draw должен быть реализован в классе '
+            f'{self.__class__.__name__}'
         )
 
 
