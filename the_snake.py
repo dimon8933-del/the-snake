@@ -14,6 +14,7 @@ from random import randint
 
 import pygame
 
+# --- Константы ---
 GRID_SIZE = 20
 SCREEN_WIDTH = 640
 SCREEN_HEIGHT = 480
@@ -22,6 +23,8 @@ GRID_WIDTH = SCREEN_WIDTH // GRID_SIZE
 GRID_HEIGHT = SCREEN_HEIGHT // GRID_SIZE
 
 CENTER_OF_SCREEN = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+DEFAULT_POSITION = (0, 0)
+DEFAULT_COLOR = (255, 255, 255)
 
 BOARD_BACKGROUND_COLOR = (30, 30, 40)
 SNAKE_COLOR = (0, 255, 0)
@@ -34,6 +37,7 @@ DOWN = (0, GRID_SIZE)
 LEFT = (-GRID_SIZE, 0)
 RIGHT = (GRID_SIZE, 0)
 
+# Глобальные переменные, инициализированные сразу (нужно для тестов)
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
@@ -42,15 +46,12 @@ clock = pygame.time.Clock()
 class GameObject:
     """Базовый класс для игровых объектов."""
 
-    def __init__(self, position=None, body_color=None):
+    def __init__(self, position=DEFAULT_POSITION, body_color=DEFAULT_COLOR):
         """Создаёт игровой объект с заданной позицией и цветом.
 
-        Если позиция или цвет не переданы, используются значения по умолчанию.
+        Если позиция или цвет не переданы, используются значения
+        по умолчанию.
         """
-        if position is None:
-            position = (0, 0)
-        if body_color is None:
-            body_color = (255, 255, 255)
         self.position = position
         self.body_color = body_color
 
@@ -66,26 +67,41 @@ class GameObject:
         pygame.draw.rect(surface, color, rect)
 
     def draw(self, surface):
-        """Заглушка метода draw — требуется тестами для GameObject.
-
-        Реальную отрисовку реализуют наследники.
+        """Метод отрисовки должен быть переопределён в наследниках.
 
         Args:
             surface: Поверхность pygame.Surface для отрисовки.
+
+        Raises:
+            NotImplementedError: Если отрисовка не реализована
+                в классе-наследнике.
         """
-        pass
+        raise NotImplementedError(
+            f"Метод draw должен быть реализован в классе "
+            f"{self.__class__.__name__}"
+        )
 
 
 class Apple(GameObject):
     """Яблоко в игре."""
 
-    def __init__(self, occupied_positions=None):
+    def __init__(
+        self,
+        occupied_positions=None,
+        position=DEFAULT_POSITION,
+        body_color=APPLE_COLOR,
+    ):
         """Создаёт яблоко и размещает его в случайной свободной клетке.
 
-        Аргумент occupied_positions используется,
-        чтобы не спавниться внутри змейки.
+        Аргумент occupied_positions используется, чтобы не спавниться
+        внутри змейки.
+
+        Args:
+            occupied_positions: Список занятых позиций.
+            position: Начальная позиция (по умолчанию DEFAULT_POSITION).
+            body_color: Цвет яблока (по умолчанию APPLE_COLOR).
         """
-        super().__init__(position=(0, 0), body_color=APPLE_COLOR)
+        super().__init__(position=position, body_color=body_color)
         if occupied_positions is None:
             occupied_positions = []
         self.randomize_position(occupied_positions)
@@ -94,8 +110,8 @@ class Apple(GameObject):
         """Размещает яблоко в случайной незанятой клетке.
 
         Args:
-            occupied_cells: Список занятых координат,
-            куда нельзя ставить яблоко.
+            occupied_cells: Список занятых координат, куда нельзя
+                ставить яблоко.
         """
         while True:
             x = randint(0, GRID_WIDTH - 1) * GRID_SIZE
@@ -123,13 +139,22 @@ class Snake(GameObject):
         direction=RIGHT,
         next_direction=None,
         body_color=SNAKE_COLOR,
+        position=CENTER_OF_SCREEN,
     ):
-        """Инициализирует змейку в центре экрана.
+        """Инициализирует змейку в заданной позиции.
 
-        Устанавливает начальную длину, направление и структуру позиций.
+        Устанавливает начальную длину, направление и структуру
+        позиций.
+
+        Args:
+            length: Начальная длина змейки.
+            direction: Начальное направление движения.
+            next_direction: Следующее направление (для обработки ввода).
+            body_color: Цвет змейки.
+            position: Начальная позиция головы (по умолчанию —
+                центр экрана).
         """
-        start_position = CENTER_OF_SCREEN
-        super().__init__(position=start_position, body_color=body_color)
+        super().__init__(position=position, body_color=body_color)
 
         self.length = length
         self.positions = [self.position]
@@ -147,7 +172,11 @@ class Snake(GameObject):
         return self.positions[0]
 
     def update_direction(self):
-        """Обновляет направление движения."""
+        """Обновляет направление движения, запрещая разворот на 180 градусов.
+
+        Направление меняется только если новый вектор не противоположен
+        текущему.
+        """
         if self.next_direction is not None:
             is_opposite = (
                 (self.direction == UP and self.next_direction == DOWN)
@@ -162,14 +191,15 @@ class Snake(GameObject):
     def move(self):
         """Двигает змейку на одну клетку в текущем направлении.
 
-        При выходе за границы экрана происходит
-        телепортация на противоположную сторону.
+        При выходе за границы экрана происходит телепортация на
+        противоположную сторону.
         """
         head_pos = self.get_head_position()
         x, y = head_pos
 
         dx, dy = self.direction
 
+        # Телепортация через границы экрана
         new_x = (x + dx) % SCREEN_WIDTH
         new_y = (y + dy) % SCREEN_HEIGHT
         new_head_pos = (new_x, new_y)
@@ -225,14 +255,13 @@ def handle_keys(snake):
 def main(max_ticks=None):
     """Запускает игровой цикл.
 
-    Если max_ticks задан,
-    цикл выполнится ровно столько итераций и завершится.
-    Это нужно для тестов,
-    чтобы они не зависали на бесконечном цикле.
+    Если max_ticks задан, цикл выполнится ровно столько итераций
+    и завершится. Это нужно для тестов, чтобы они не зависали
+    на бесконечном цикле.
 
     Args:
         max_ticks: Максимальное количество итераций цикла.
-        Если None — бесконечный цикл.
+                   Если None — бесконечный цикл.
     """
     snake = Snake()
     apple = Apple(snake.positions)
@@ -260,6 +289,7 @@ def main(max_ticks=None):
         apple.draw(screen)
         pygame.display.flip()
 
+        # Логика завершения цикла только для тестирования
         if max_ticks is not None:
             ticks_count += 1
             if ticks_count >= max_ticks:
