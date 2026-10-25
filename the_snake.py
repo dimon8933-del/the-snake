@@ -14,7 +14,6 @@ from random import randint
 
 import pygame
 
-# --- Константы ---
 GRID_SIZE = 20
 SCREEN_WIDTH = 640
 SCREEN_HEIGHT = 480
@@ -35,7 +34,6 @@ DOWN = (0, GRID_SIZE)
 LEFT = (-GRID_SIZE, 0)
 RIGHT = (GRID_SIZE, 0)
 
-# Глобальные переменные, инициализированные сразу (нужно для тестов)
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
@@ -151,7 +149,6 @@ class Snake(GameObject):
     def update_direction(self):
         """Обновляет направление движения."""
         if self.next_direction is not None:
-            # Запрет разворота на 180 градусов
             is_opposite = (
                 (self.direction == UP and self.next_direction == DOWN)
                 or (self.direction == DOWN and self.next_direction == UP)
@@ -173,7 +170,6 @@ class Snake(GameObject):
 
         dx, dy = self.direction
 
-        # Телепортация через границы экрана
         new_x = (x + dx) % SCREEN_WIDTH
         new_y = (y + dy) % SCREEN_HEIGHT
         new_head_pos = (new_x, new_y)
@@ -264,7 +260,6 @@ def main(max_ticks=None):
         apple.draw(screen)
         pygame.display.flip()
 
-        # Выход из цикла для тестов
         if max_ticks is not None:
             ticks_count += 1
             if ticks_count >= max_ticks:
