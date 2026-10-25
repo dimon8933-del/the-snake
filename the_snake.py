@@ -2,7 +2,6 @@ import sys
 import pygame
 from random import randint
 
-# --- Константы ---
 GRID_SIZE = 20
 SCREEN_WIDTH = 640
 SCREEN_HEIGHT = 480
@@ -15,14 +14,12 @@ APPLE_COLOR = (255, 0, 0)
 
 SPEED = 10
 
-# Направления как смещения (dx, dy)
 UP = (0, -GRID_SIZE)
 DOWN = (0, GRID_SIZE)
 LEFT = (-GRID_SIZE, 0)
 RIGHT = (GRID_SIZE, 0)
 
 
-# --- Базовый класс ---
 class GameObject:
     def __init__(self, position, body_color):
         self.position = position
@@ -34,10 +31,8 @@ class GameObject:
         pygame.draw.rect(surface, color, rect)
 
 
-# --- Класс Apple ---
 class Apple(GameObject):
     def __init__(self, occupied_positions):
-        # Начальную позицию сразу делаем валидной
         super().__init__(position=(0, 0), body_color=APPLE_COLOR)
         self.randomize_position(occupied_positions)
 
@@ -54,7 +49,6 @@ class Apple(GameObject):
         self.draw_rect(surface, self.position, self.body_color)
 
 
-# --- Класс Snake ---
 class Snake(GameObject):
     def __init__(
         self,
@@ -64,11 +58,9 @@ class Snake(GameObject):
         body_color=SNAKE_COLOR
     ):
         start_position = CENTER_OF_SCREEN
-        # Передаём позицию и цвет в родительский конструктор
         super().__init__(position=start_position, body_color=body_color)
 
         self.length = length
-        # Инициализируем список сегментов через self.position из родителя
         self.positions = [self.position]
 
         self.direction = direction
@@ -80,7 +72,6 @@ class Snake(GameObject):
 
     def update_direction(self):
         if self.next_direction is not None:
-            # Запрещаем разворот на 180 градусов
             if not (
                 (self.direction == UP and self.next_direction == DOWN) or
                 (self.direction == DOWN and self.next_direction == UP) or
@@ -96,7 +87,6 @@ class Snake(GameObject):
 
         dx, dy = self.direction
 
-        # Телепортация через границы экрана
         new_x = (x + dx) % SCREEN_WIDTH
         new_y = (y + dy) % SCREEN_HEIGHT
         new_head_pos = (new_x, new_y)
@@ -109,14 +99,12 @@ class Snake(GameObject):
     def reset(self):
         """Только сброс состояния объекта, без отрисовки."""
         self.length = 1
-        # Синхронизируем с позицией из родителя
         self.positions = [self.position]
         self.direction = RIGHT
         self.next_direction = None
         self.last_tail_pos = None
 
     def draw(self, surface):
-        # Используем get_head_position вместо прямого доступа к списку
         head_pos = self.get_head_position()
         self.draw_rect(surface, head_pos, self.body_color)
 
@@ -124,7 +112,6 @@ class Snake(GameObject):
             self.draw_rect(surface, segment_pos, self.body_color)
 
 
-# --- Обработка ввода ---
 def handle_keys(snake):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -142,7 +129,6 @@ def handle_keys(snake):
                 snake.next_direction = RIGHT
 
 
-# --- Главный цикл ---
 def main():
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -161,16 +147,13 @@ def main():
 
         head_pos = snake.get_head_position()
 
-        # if-elif: за один кадр змейка либо съедает яблоко, либо врезается в себя
         if head_pos == apple.position:
             snake.length += 1
             apple.randomize_position(snake.positions)
         elif head_pos in snake.positions[1:]:
             snake.reset()
-            # Обязательно двигаем яблоко, чтобы оно не оказалось на теле змейки
             apple.randomize_position(snake.positions)
 
-        # Отрисовка
         screen.fill(BOARD_BACKGROUND_COLOR)
         snake.draw(screen)
         apple.draw(screen)
