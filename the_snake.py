@@ -107,14 +107,29 @@ class Apple(GameObject):
         self.randomize_position(occupied_positions)
 
     def randomize_position(self, occupied_cells):
+        """Размещает яблоко в случайной незанятой клетке.
+
+        Генерирует координаты до тех пор, пока не получит позицию,
+        которая не совпадает ни с одной из занятых.
+
+        Args:
+            occupied_cells: Список занятых координат, куда нельзя
+                ставить яблоко.
+        """
         candidate = None
         while candidate is None or candidate in occupied_cells:
             candidate = (
                 randint(0, GRID_WIDTH - 1) * GRID_SIZE,
                 randint(0, GRID_HEIGHT - 1) * GRID_SIZE,
             )
+        self.position = candidate
 
     def draw(self, surface):
+        """Отрисовывает яблоко на поверхности.
+
+        Args:
+            surface: Поверхность pygame.Surface для отрисовки.
+        """
         self.draw_rect(surface, self.position, self.body_color)
 
 
