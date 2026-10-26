@@ -107,26 +107,14 @@ class Apple(GameObject):
         self.randomize_position(occupied_positions)
 
     def randomize_position(self, occupied_cells):
-        """Размещает яблоко в случайной незанятой клетке.
-
-        Args:
-            occupied_cells: Список занятых координат, куда нельзя
-                ставить яблоко.
-        """
-        while True:
-            x = randint(0, GRID_WIDTH - 1) * GRID_SIZE
-            y = randint(0, GRID_HEIGHT - 1) * GRID_SIZE
-            candidate = (x, y)
-            if candidate not in occupied_cells:
-                self.position = candidate
-                return
+        candidate = None
+        while candidate is None or candidate in occupied_cells:
+            candidate = (
+                randint(0, GRID_WIDTH - 1) * GRID_SIZE,
+                randint(0, GRID_HEIGHT - 1) * GRID_SIZE,
+            )
 
     def draw(self, surface):
-        """Отрисовывает яблоко.
-
-        Args:
-            surface: Поверхность pygame.Surface для отрисовки.
-        """
         self.draw_rect(surface, self.position, self.body_color)
 
 
@@ -266,8 +254,6 @@ def main(max_ticks=None):
     snake = Snake()
     apple = Apple(snake.positions)
 
-    ticks_count = 0
-
     while True:
         clock.tick(SPEED)
 
@@ -288,12 +274,6 @@ def main(max_ticks=None):
         snake.draw(screen)
         apple.draw(screen)
         pygame.display.flip()
-
-        # Логика завершения цикла только для тестирования
-        if max_ticks is not None:
-            ticks_count += 1
-            if ticks_count >= max_ticks:
-                break
 
 
 if __name__ == '__main__':
